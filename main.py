@@ -10,6 +10,9 @@ url = 'http://www.e-himart.co.kr/app/goods/goodsDetail?goodsNo=0003948195'
 txt = 'stock.log'
 cycle = True
 
+f = open(txt, 'a')
+f.write('['+time.strftime('%y-%m-%d %H:%M:%S', time.localtime(time.time()))+'] 에 ' + url + '의 재고 현황 15분마다 추적 시작')
+print('['+time.strftime('%y-%m-%d %H:%M:%S', time.localtime(time.time()))+'] 에 ' + url + '의 재고 현황 15분마다 추적 시작')
 #파이어폭스  설정
 firefox_options = webdriver.firefox.options.Options()
 firefox_options.headless = True
@@ -17,7 +20,6 @@ driver = webdriver.Firefox(options=firefox_options)
 driver.implicitly_wait(3)
 
 
-f = open(txt, 'a')  #결과값 저장
 while True:
     if (cycle == True) and int(time.strftime('%M', time.localtime(time.time()))) == 00 or 15 or 30 or 45:
         LocalTime = '['+time.strftime('%y-%m-%d %H:%M:%S', time.localtime(time.time()))+']'  #불러온 시간 저장
@@ -48,8 +50,7 @@ while True:
                 f.write(info + '재고값 개체를 찾을 수 없음')
                 sys.exit(info + '오류: 재고값 개체를 찾을 수 없음')  #오류 종료
 
-
-
+        
         #결과 분류
         if '재고가 일시 품절된 상품입니다.' in stock_str:
                 print(info+'품절')
