@@ -11,9 +11,9 @@ cycle = True
 
 def newtab():
     driver.execute_script('window.open(\"about:blank\", \"_blank\")')
-    driver.switch_to_window(driver.window_handles[0])
+    driver.switch_to.window(driver.window_handles[0])
     driver.close()
-    driver.switch_to_window(driver.window_handles[0])
+    driver.switch_to.window(driver.window_handles[0])
 
 def title(bs, url):
     title = bs.select('head > title')
