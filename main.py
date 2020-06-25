@@ -36,8 +36,8 @@ try:
     firefox_options.headless = True
     driver = webdriver.Firefox(options=firefox_options)
     driver.implicitly_wait(3)
-    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ---------geckodriver를 불러옴---------\n')
-    print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ---------geckodriver를 불러옴---------')
+    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------geckodriver를 불러옴----------\n')
+    print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------geckodriver를 불러옴----------')
 except:
     f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckdriver를 찾을 수 없음\n')
     sys.exit(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckodriver를 찾을 수 없음')
