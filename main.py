@@ -9,19 +9,6 @@ nvr_url = 'https://search.shopping.naver.com/detail/detail.nhn?nvMid=20985197108
 txt = 'stock.log'
 cycle = True
 
-f = open(txt, 'a')
-f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' 시작\n')
-print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' 시작')
-#파이어폭스  설정
-try:
-    firefox_options = webdriver.firefox.options.Options()
-    #firefox_options.headless = True
-    driver = webdriver.Firefox(options=firefox_options)
-    driver.implicitly_wait(3)
-except:
-    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckdriver를 찾을 수 없음\n')
-    sys.exit(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckodriver를 찾을 수 없음')
-
 def newtab():
     driver.execute_script('window.open(\"about:blank\", \"_blank\")')
     driver.switch_to_window(driver.window_handles[0])
@@ -38,6 +25,20 @@ def title(bs, url):
     except:
         f.write(Localtime + ' 「' + url + '」' + '의 결과: 오류: <title> 헤더를 찾을 수 없음\n')
         sys.exit(Localtime + ' 「' + url + '」' + '의 결과: 오류: <title> 헤더를 찾을 수 없음')
+
+
+f = open(txt, 'a')
+f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------------시작----------------\n')
+print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------------시작----------------')
+#파이어폭스  설정
+try:
+    firefox_options = webdriver.firefox.options.Options()
+    firefox_options.headless = True
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.implicitly_wait(3)
+except:
+    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckdriver를 찾을 수 없음\n')
+    sys.exit(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckodriver를 찾을 수 없음')
 
 f.close()
 while True:
@@ -94,7 +95,7 @@ while True:
 
         print(nvr_info + nvr_price + '원')
         f.write(nvr_info + nvr_price + '원\n')
-        f.write('_________________________________________________________')
+        f.write('_________________________________________________________\n')
         f.close()
 
 
