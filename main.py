@@ -26,34 +26,36 @@ def title(bs, url):
         f.write(Localtime + ' 「' + url + '」' + '의 결과: 오류: <title> 헤더를 찾을 수 없음\n')
         sys.exit(Localtime + ' 「' + url + '」' + '의 결과: 오류: <title> 헤더를 찾을 수 없음')
 
+def timenow():
+    return time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))
 
 f = open(txt, 'a')
-f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------------시작----------------\n')
-print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' ----------------시작----------------')
+f.write(timenow()+' ----------------시작----------------\n')
+print(timenow()+' ----------------시작----------------')
 #파이어폭스  설정
 try:
     firefox_options = webdriver.firefox.options.Options()
     firefox_options.headless = True
     driver = webdriver.Firefox(options=firefox_options)
     driver.implicitly_wait(3)
-    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' --------geckodriver를 불러옴--------\n')
-    print(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))+' --------geckodriver를 불러옴--------')
+    f.write(timenow()+' --------geckodriver를 불러옴--------\n')
+    print(timenow()+' --------geckodriver를 불러옴--------')
 except:
-    f.write(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckdriver를 찾을 수 없음\n')
-    sys.exit(time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time())) + ' geckodriver를 찾을 수 없음')
+    f.write(timenow() + ' geckdriver를 찾을 수 없음\n')
+    sys.exit(timenow() + ' geckodriver를 찾을 수 없음')
 
 f.close()
 while True:
     time15 = int(time.strftime('%M', time.localtime(time.time())))
     if (time15 == 00 or time15 == 15 or time15 == 30 or time15 == 45):
         f = open(txt, 'a')
-        LocalTime = time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))  #불러온 시간 저장
+        hi_LocalTime = timenow()  #불러온 시간 저장
         driver.get(hi_url)  #파이어폭스에서 불러오기
         hi_html = driver.page_source
         newtab()
         hi_bs = BeautifulSoup(hi_html, 'html.parser')
         hi_title_str = title(hi_bs, hi_url)
-        hi_info = LocalTime + ' 「' + hi_title_str + '」' + '의 결과: '
+        hi_info = hi_LocalTime + ' 「' + hi_title_str + '」'
 
         #재고값 선택
         hi_stock = hi_bs.select("#content > div.detailArea > div.prdSec > div.rightSec > div")
@@ -67,23 +69,23 @@ while True:
         #결과 분류
         if '재고가 일시 품절된 상품입니다.' in hi_stock_str:
                 print(hi_info+'품절')
-                f.write(hi_info +'품절\n')
+                f.write(hi_info +'품절')
         elif '바로구매' in hi_stock_str:
                 print(hi_info +'보유')
-                f.write(hi_info +'보유\n')
+                f.write(hi_info +'보유')
         else:
                 f.write(hi_info +'오류: 분류할 수 없음\n')
                 sys.exit(hi_info +'오류: 분류할 수 없음')
         f.close()
 
         f = open(txt, 'a')
-        LocalTime = time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))
+        nvr_LocalTime = timenow()
         driver.get(nvr_url)
         nvr_html = driver.page_source
         newtab()
         nvr_bs = BeautifulSoup(nvr_html, 'html.parser')
         nvr_title_str = title(nvr_bs, nvr_url)
-        nvr_info = LocalTime + ' 「' + nvr_title_str + '」' + '의 결과: '
+        nvr_info = nvr_LocalTime + ' 「' + nvr_title_str + '」'
 
         #가격 선택
         nvr_price = nvr_bs.select('em.num')
@@ -97,7 +99,7 @@ while True:
 
         print(nvr_info + nvr_price + '원')
         f.write(nvr_info + nvr_price + '원\n')
-        f.write('_________________________________________________________\n')
+        f.write('________________________________________________________\n')
         f.close()
 
 
