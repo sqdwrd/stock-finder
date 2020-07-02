@@ -49,8 +49,8 @@ while True:
     time15 = int(time.strftime('%M', time.localtime(time.time())))
     if (time15 == 00 or time15 == 15 or time15 == 30 or time15 == 45):
         f = open(txt, 'a')
-        hi_LocalTime = timenow()  #불러온 시간 저장
         driver.get(hi_url)  #파이어폭스에서 불러오기
+        hi_LocalTime = timenow()
         hi_html = driver.page_source
         newtab()
         hi_bs = BeautifulSoup(hi_html, 'html.parser')
@@ -68,19 +68,17 @@ while True:
 
         #결과 분류
         if '재고가 일시 품절된 상품입니다.' in hi_stock_str:
-                print(hi_info+'품절')
-                f.write(hi_info +'품절')
+                hi_result = '품절'
         elif '바로구매' in hi_stock_str:
-                print(hi_info +'보유')
-                f.write(hi_info +'보유')
+                hi_result = '보유'
         else:
                 f.write(hi_info +'오류: 분류할 수 없음\n')
                 sys.exit(hi_info +'오류: 분류할 수 없음')
         f.close()
 
         f = open(txt, 'a')
-        nvr_LocalTime = timenow()
         driver.get(nvr_url)
+        nvr_LocalTime = timenow()
         nvr_html = driver.page_source
         newtab()
         nvr_bs = BeautifulSoup(nvr_html, 'html.parser')
@@ -97,9 +95,9 @@ while True:
             f.write(nvr_info + "오류: 가격 개체를 찾을 수 없음\n")
             sys.exit(nvr_info + "오류: 가격 개체를 찾을 수 없음")
 
-        print(nvr_info + nvr_price + '원')
-        f.write(nvr_info + nvr_price + '원\n')
-        f.write('________________________________________________________\n')
+        nvr_result = '₩' + nvr_price
+        print(nvr_LocalTime, hi_result + '; ' + nvr_result)
+        f.write(nvr_LocalTime, hi_result + '; ' + nvr_result + '\n')
         f.close()
 
 
