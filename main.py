@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from
 import time
 import sys
 
@@ -30,19 +29,20 @@ def title(bs, url):
 def timenow():
     return time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))
 
-
 f = open(txt, 'a')
 f.write(timenow()+' ----------------시작----------------\n')
 print(timenow()+' ----------------시작----------------')
-
 #파이어폭스  설정
-firefox_options = webdriver.firefox.options.Options()
-firefox_options.headless = True
-driver = webdriver.Firefox(options=firefox_options)
-driver.implicitly_wait(3)
-f.write(timenow()+' --------geckodriver를 불러옴--------\n')
-print(timenow()+' --------geckodriver를 불러옴--------')
-
+try:
+    firefox_options = webdriver.firefox.options.Options()
+    firefox_options.headless = True
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.implicitly_wait(3)
+    f.write(timenow()+' --------geckodriver를 불러옴--------\n')
+    print(timenow()+' --------geckodriver를 불러옴--------')
+except:
+    f.write(timenow() + ' geckdriver를 찾을 수 없음\n')
+    sys.exit(timenow() + ' geckodriver를 찾을 수 없음')
 
 f.close()
 while True:
@@ -88,7 +88,9 @@ while True:
         #가격 선택
         nvr_price = nvr_bs.select('em.num')
         try:
-            nvr_price = str(str(str(nvr_price).split("<em class=\"num\">")[1]).split("</em>")[0])
+            nvr_price = str(nvr_price).split("<em class=\"num\">")
+            nvr_price = str(nvr_price[1]).split("</em>")
+            nvr_price = str(nvr_price[0])
         except:
             f.write(nvr_info + "오류: 가격 개체를 찾을 수 없음\n")
             sys.exit(nvr_info + "오류: 가격 개체를 찾을 수 없음")
