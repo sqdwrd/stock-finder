@@ -96,8 +96,8 @@ while True:
             sys.exit(nvr_info + "오류: 가격 개체를 찾을 수 없음")
 
         nvr_result = '₩' + nvr_price
-        print(nvr_LocalTime, hi_result + '; ' + nvr_result)
-        f.write(nvr_LocalTime, hi_result + '; ' + nvr_result + '\n')
+        print(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result)
+        f.write(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result + '\n')
         f.close()
 
 
