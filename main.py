@@ -9,10 +9,12 @@ nvr_url = 'https://search.shopping.naver.com/detail/detail.nhn?nvMid=20985197108
 txt = 'stock.log'
 cycle = True
 
-def load_driver():
-    firefox_options = webdriver.firefox.options.Options()
-    firefox_options.headless = True
-    global driver = webdriver.Firefox(options=firefox_options)
+
+def getargv(num):
+    try:
+        return sys.argv[num]
+    except IndexError:
+        return None
 
 def newtab():
     driver.execute_script('window.open(\"about:blank\", \"_blank\")')
@@ -34,17 +36,37 @@ def title(bs, url):
 def timenow():
     return time.strftime('[%y-%m-%d %H:%M:%S]', time.localtime(time.time()))
 
+def cycle15():
+    min = int(time.strftime('%M', time.localtime(time.time())))
+    if isdebug == True:
+        return True
+    elif min == 00 or min == 15 or min == 30 or min == 45:
+        return True
+
+if getargv(1) == '--debug':
+    isdebug = True
+else:
+    isdebug = False
+
 f = open(txt, 'a')
-f.write(timenow()+' ----------------시작----------------\n')
-print(timenow()+' ----------------시작----------------')
+if isdebug == True:
+    print(timenow() + ' ----------------디버깅 시작---------------')
+    f.write(timenow() + ' ----------------디버깅 시작---------------\n')
+else:
+    print(timenow() + ' ----------------시작----------------')
+    f.write(timenow() + ' ----------------시작----------------\n')
 
 f.close()
 while True:
-    time15 = int(time.strftime('%M', time.localtime(time.time())))
-    if (time15 == 00 or time15 == 15 or time15 == 30 or time15 == 45):
-        load_driver()
+    if cycle15():
+        firefox_options = webdriver.firefox.options.Options()
+        if isdebug == False:
+            firefox_options.headless = True
+        driver = webdriver.Firefox(options=firefox_options)
         f = open(txt, 'a')
-        driver.get(hi_url)  #파이어폭스에서 불러오기
+
+        #하이마트
+        driver.get(hi_url)
         hi_LocalTime = timenow()
         hi_html = driver.page_source
         hi_bs = BeautifulSoup(hi_html, 'html.parser')
@@ -68,8 +90,7 @@ while True:
         else:
                 f.write(hi_info +'오류: 분류할 수 없음\n')
                 sys.exit(hi_info +'오류: 분류할 수 없음')
-        f.close()
-
+    #네이버페이
         f = open(txt, 'a')
         driver.get(nvr_url)
         nvr_LocalTime = timenow()
@@ -87,10 +108,16 @@ while True:
         except:
             f.write(nvr_info + "오류: 가격 개체를 찾을 수 없음\n")
             sys.exit(nvr_info + "오류: 가격 개체를 찾을 수 없음")
-
         nvr_result = '₩' + nvr_price
-        print(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result)
-        f.write(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result + '\n')
+
+        if isdebug == True:
+            print(hi_info + ' ' + hi_result)
+            f.write(hi_info + ' ' + hi_result + '\n')
+            print(nvr_info + ' ' + nvr_result)
+            f.write(nvr_info + ' ' + nvr_result + '\n')
+        else:
+            print(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result)
+            f.write(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result + '\n')
         f.close()
         driver.close()
         time.sleep(60)
