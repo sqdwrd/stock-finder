@@ -9,6 +9,11 @@ nvr_url = 'https://search.shopping.naver.com/detail/detail.nhn?nvMid=20985197108
 txt = 'stock.log'
 cycle = True
 
+def load_driver():
+    firefox_options = webdriver.firefox.options.Options()
+    firefox_options.headless = True
+    global driver = webdriver.Firefox(options=firefox_options)
+
 def newtab():
     driver.execute_script('window.open(\"about:blank\", \"_blank\")')
     driver.switch_to.window(driver.window_handles[0])
@@ -32,27 +37,16 @@ def timenow():
 f = open(txt, 'a')
 f.write(timenow()+' ----------------시작----------------\n')
 print(timenow()+' ----------------시작----------------')
-#파이어폭스  설정
-try:
-    firefox_options = webdriver.firefox.options.Options()
-    firefox_options.headless = True
-    driver = webdriver.Firefox(options=firefox_options)
-    driver.implicitly_wait(3)
-    f.write(timenow()+' --------geckodriver를 불러옴--------\n')
-    print(timenow()+' --------geckodriver를 불러옴--------')
-except:
-    f.write(timenow() + ' geckdriver를 찾을 수 없음\n')
-    sys.exit(timenow() + ' geckodriver를 찾을 수 없음')
 
 f.close()
 while True:
     time15 = int(time.strftime('%M', time.localtime(time.time())))
     if (time15 == 00 or time15 == 15 or time15 == 30 or time15 == 45):
+        load_driver()
         f = open(txt, 'a')
         driver.get(hi_url)  #파이어폭스에서 불러오기
         hi_LocalTime = timenow()
         hi_html = driver.page_source
-        newtab()
         hi_bs = BeautifulSoup(hi_html, 'html.parser')
         hi_title_str = title(hi_bs, hi_url)
         hi_info = hi_LocalTime + ' 「' + hi_title_str + '」'
@@ -80,7 +74,6 @@ while True:
         driver.get(nvr_url)
         nvr_LocalTime = timenow()
         nvr_html = driver.page_source
-        newtab()
         nvr_bs = BeautifulSoup(nvr_html, 'html.parser')
         nvr_title_str = title(nvr_bs, nvr_url)
         nvr_info = nvr_LocalTime + ' 「' + nvr_title_str + '」'
@@ -99,6 +92,5 @@ while True:
         print(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result)
         f.write(nvr_LocalTime + ' ' + hi_result + '; ' + nvr_result + '\n')
         f.close()
-
-
+        driver.close()
         time.sleep(60)
