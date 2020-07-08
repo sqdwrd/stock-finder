@@ -69,6 +69,7 @@ while True:
         #하이마트
         driver.get(hi_url)
         hi_LocalTime = timenow()
+        hi_LocalTime2 = time.strftime('%y-%m-%d_%H:%M:%S', time.localtime(time.time()))
         hi_html = driver.page_source
         hi_bs = BeautifulSoup(hi_html, 'html.parser')
         hi_title_str = title(hi_bs, hi_url)
@@ -95,6 +96,7 @@ while True:
         f = open(txt, 'a')
         driver.get(nvr_url)
         nvr_LocalTime = timenow()
+        nvr_LocalTime2 = time.strftime('%y-%m-%d_%H:%M:%S', time.localtime(time.time()))
         nvr_html = driver.page_source
         nvr_bs = BeautifulSoup(nvr_html, 'html.parser')
         nvr_title_str = title(nvr_bs, nvr_url)
@@ -122,10 +124,10 @@ while True:
 
         if hi_result == '보유':
             try:
-                htmlf = open(nvr_localtime + 'html/하이마트.html', 'w')
+                htmlf = open('html/' + hi_LocalTime2 + '하이마트.html', 'w')
             except FileNotFoundError:
                 subprocess.run(['mkdir', 'html'])
-                htmlf = open(nvr_localtime + 'html/하이마트.html', 'w')
+                htmlf = open('html/' + hi_LocalTime2 + '하이마트.html', 'w')
             htmlf.write(hi_html)
             htmlf.close()
 
@@ -137,10 +139,10 @@ while True:
         nvr_intprice = int(nvr_intprice)
         if nvr_price <= 90000:
             try:
-                htmlf = open(nvr_localtime + 'html/네이버.html', 'w')
+                htmlf = open('html/' + nvr_LocalTime2 + '네이버.html', 'w')
             except FileNotFoundError:
                 subprocess.run(['mkdir', 'html'])
-                htmlf = open(nvr_localtime + 'html/네이버.html', 'w')
+                htmlf = open('html/' + nvr_LocalTime2 + '네이버.html', 'w')
             htmlf.write(nvr_html)
             htmlf.close()
 
