@@ -136,8 +136,10 @@ while True:
             try:
                 int(i)
                 nvr_intprice = nvr_intprice + i
+            except:
+                pass
         nvr_intprice = int(nvr_intprice)
-        if nvr_price <= 90000:
+        if nvr_intprice <= 90000:
             try:
                 htmlf = open('html/' + nvr_LocalTime2 + '네이버.html', 'w')
             except FileNotFoundError:
