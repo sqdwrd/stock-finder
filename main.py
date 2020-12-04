@@ -10,6 +10,11 @@ log = 'stock.log'
 cycle = True
 
 
+class NoConfigFile(Exception):
+    def __init__(self):
+        super().__init__('Can\'t read config file. Try with --config parameter!')
+
+
 def get_argv(num):
     try:
         return sys.argv[num]
@@ -86,9 +91,13 @@ with open(log, 'a', -1, 'utf-8') as f:
         f.write(time.strftime('[%x,%X] ') + '----------------시작----------------\n')
 
 NShopping = Shop()
-config = configparser.ConfigParser()
-config.read('config.ini')
-NShopping.url = config['NShopping']['URL'].replace('%%', '%')
+try:
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    NShopping.url = config['NShopping']['URL'].replace('%%', '%')
+except KeyError:
+    raise NoConfigFile
+
 
 while True:
     if repeat_cycle():
@@ -110,7 +119,7 @@ while True:
         NShopping.price = NShopping.bs.select(NShopping.priceSelector)[0].text
 
         print(time.strftime('[%x,%X] ', NShopping.time) + '₩ ' + NShopping.price)
-        f.write(time.strftime('[%x,%X] ', NShopping.time)+ '₩ ' + NShopping.price + '\n')
+        f.write(time.strftime('[%x,%X] ', NShopping.time) + '₩ ' + NShopping.price + '\n')
 
         f.close()
         driver.close()
