@@ -4,4 +4,7 @@ nohup.out
 *.bak
 html/*
 todo
-venv/*
+.venv/*
+.idea/*
+*geckodriver*
+config.ini
