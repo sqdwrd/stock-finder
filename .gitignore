@@ -8,3 +8,5 @@ todo
 .idea/*
 *geckodriver*
 config.ini
+
+Server/.venv/
