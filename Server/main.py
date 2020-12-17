@@ -3,10 +3,7 @@ import configparser
 import re
 import sys
 import time
-
-from bs4 import BeautifulSoup
 from selenium import webdriver
-from collections import deque
 
 log = 'stock.log'
 cycle = True
@@ -22,13 +19,6 @@ def get_argv(num):
         return sys.argv[num]
     except IndexError:
         return None
-
-
-def new_tab():
-    driver.execute_script('window.open(\"about:blank\", \"_blank\")')
-    driver.switch_to.window(driver.window_handles[0])
-    driver.close()
-    driver.switch_to.window(driver.window_handles[0])
 
 
 def int_sieve(raw_value):
@@ -65,20 +55,23 @@ class Shop:
     url = None
     time = None
     title = None
-    bs = None
-    html = None
     Price = None
     priceSelector = None
     includeShipChkBoxSelector = None
     shipPriceSelector = None
     shipPrice = None
+    browser = None
+    browser_options = None
+
+    def config_browser(self):
+        self.browser_options = webdriver.firefox.options.Options()
+        if not debugMode:
+            self.browser_options.headless = True
+        self.browser = webdriver.Firefox(options=self.browser_options)
 
     def get_title(self):
-        title = self.bs.select('head > title')
-        title_str = str(title[0]).split('<title>')
-        title_str = str(title_str[1]).split('</title>')
-        title_str = str(title_str[0])
-        return title_str
+        title = self.browser.find_element_by_css_selector('head > title').text
+        return title
 
 
 if configMode:
@@ -116,34 +109,29 @@ except KeyError:
 
 while True:
     if repeat_cycle():
-        firefox_options = webdriver.firefox.options.Options()
-        if not debugMode:
-            firefox_options.headless = True
-        driver = webdriver.Firefox(options=firefox_options)
         f = open(log, 'a', -1, "utf-8")
-
-        driver.get(NShopping.url)
+        NShopping.config_browser()
+        NShopping.browser.get(NShopping.url)
         NShopping.priceSelector = r'.lowestPrice_num__3AlQ-'
         NShopping.includeShipChkBoxSelector = r'.filter_chk_box__23BvI'
         NShopping.shipPriceSelector = r'.lowestPrice_delivery_price__3f-2l > em'
-        driver.find_element_by_css_selector(NShopping.includeShipChkBoxSelector).click()
-        NShopping.html = driver.page_source
-        NShopping.bs = BeautifulSoup(NShopping.html, 'html.parser')
+        NShopping.browser.find_element_by_css_selector(NShopping.includeShipChkBoxSelector).click()
         NShopping.title = NShopping.get_title()
         NShopping.time = time.gmtime(int(time.time()))
 
-#        nvr_info = nvr_LocalTime + ' 「' + nvr_title_str + '」'
-
-        # 가격 선택
-        NShopping.rawPrice = driver.find_element_by_css_selector(NShopping.priceSelector).text
+        NShopping.rawPrice = NShopping.browser.find_element_by_css_selector(NShopping.priceSelector).text
         NShopping.price = int_sieve(NShopping.rawPrice)
 
-        NShopping.rawShipPrice = driver.find_element_by_css_selector(NShopping.shipPriceSelector).text
+        NShopping.rawShipPrice = NShopping.browser.find_element_by_css_selector(NShopping.shipPriceSelector).text
         NShopping.shipPrice = int_sieve(NShopping.rawShipPrice)
-        NShopping.finalPrice = NShopping.price + NShopping.shipPrice
-        print(time.strftime('[%x,%X] ', NShopping.time) + '₩ ' + NShopping.finalPrice)
-        f.write(time.strftime('[%x,%X] ', NShopping.time) + '₩ ' + NShopping.finalPrice + '\n')
+
+        NShopping.finalPrice = int(NShopping.price) + int(NShopping.shipPrice)
+        NShopping.finalPrice = str(NShopping.finalPrice)
+        print(time.strftime('[%x,%X] ', NShopping.time) + NShopping.get_title() + '의 내용: '
+              + '₩ ' + NShopping.finalPrice)
+        f.write(time.strftime('[%x,%X] ', NShopping.time) + NShopping.get_title() + '의 내용: '
+                + '₩ ' + NShopping.finalPrice + '\n')
 
         f.close()
-        driver.close()
+        NShopping.browser.close()
         time.sleep(60)
