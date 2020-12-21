@@ -3,6 +3,7 @@ import configparser
 import re
 import sys
 import time
+import json
 from selenium import webdriver
 
 log = 'stock.log'
@@ -33,22 +34,36 @@ def int_sieve(raw_value):
     return ''.join(value)
 
 
-if '--debug' in sys.argv:
-    debugMode = True
-else:
-    debugMode = False
-if '--config' in sys.argv:
-    configMode = True
-else:
-    configMode = False
-
-
 def repeat_cycle():
     minute = int(time.strftime('%M'))
     if debugMode:
         return True
     elif minute == 00:
         return True
+
+
+def configure():
+    config = configparser.ConfigParser()
+    shops = ['1']
+    shop = input('choose shop [1 = Naver Shopping]\n>>')
+    while shop not in shops:
+        shop = input('\033[31m' + 'Shop incorrect!' + '\033[0m' + '\nchoose shop [1 = Naver Shopping]\n>>')
+    if shop == '1':
+        regex = re.compile('^https?://search.shopping.naver.com/catalog/')
+        url = input("input URL\n>>")
+        while regex.match(url) is None:
+            url = input('\033[31m' + 'URL incorrect!' + '\033[0m' + '\ninput URL\n>>')
+        url = url.replace('%', '%%')
+        config['NShopping'] = {}
+        config['NShopping']['URL'] = url
+        with open('config.ini', 'w') as configFile:
+            config.write(configFile)
+        with open('stock.json', 'w', encoding='utf-8') as json_File:
+            json_data = dict()
+            json_data['NaverShopping'] = list()
+            json_data['NaverShopping'].append({'url': url})
+            json_data['NaverShopping'].append({'data': list()})
+            json_File.write(json.dumps(json_data))
 
 
 class Shop:
@@ -70,33 +85,28 @@ class Shop:
         self.browser = webdriver.Firefox(options=self.browser_options)
 
     def get_title(self):
-        title = self.browser.find_element_by_css_selector('head > title').text
-        return title
+        return self.browser.find_element_by_css_selector('head > title').text
 
+
+if '--debug' in sys.argv:
+    debugMode = True
+else:
+    debugMode = False
+if '--config' in sys.argv:
+    configMode = True
+else:
+    configMode = False
 
 if configMode:
-    config = configparser.ConfigParser()
-    shops = ['1', '2']
-    shop = input('choose shop [1 = Naver Shopping]\n>>')
-    while shop not in shops:
-        shop = input('\033[31m' + 'Shop incorrect!' + '\033[0m' + '\nchoose shop [1 = Naver Shopping]\n>>')
-    if shop == '1':
-        regex = re.compile('^https?://search.shopping.naver.com/catalog/')
-        tempUrl = input("input URL\n>>")
-        while regex.match(tempUrl) is None:
-            tempUrl = input('\033[31m' + 'URL incorrect!' + '\033[0m' + '\ninput URL\n>>')
-        config['NShopping'] = {}
-        config['NShopping']['URL'] = tempUrl.replace('%', '%%')
-        with open('config.ini', 'w') as configFile:
-            config.write(configFile)
+    configure()
 
 with open(log, 'a', -1, 'utf-8') as f:
     if debugMode:
-        print(time.strftime('[%x,%X] ') + '-------------디버깅 시작------------')
-        f.write(time.strftime('[%x,%X] ') + '-------------디버깅 시작------------\n')
+        print(time.strftime('[%y/%m/%d,%X] ') + '-------------디버깅 시작------------')
+        f.write(time.strftime('[%y/%m/%d,%X] ') + '-------------디버깅 시작------------\n')
     else:
-        print(time.strftime('[%x,%X] ') + '----------------시작----------------')
-        f.write(time.strftime('[%x,%X] ') + '----------------시작----------------\n')
+        print(time.strftime('[%y/%m/%d,%X] ') + '----------------시작----------------')
+        f.write(time.strftime('[%y/%m/%d,%X] ') + '----------------시작----------------\n')
 
 NShopping = Shop()
 try:
@@ -116,22 +126,27 @@ while True:
         NShopping.includeShipChkBoxSelector = r'.filter_chk_box__23BvI'
         NShopping.shipPriceSelector = r'.lowestPrice_delivery_price__3f-2l > em'
         NShopping.browser.find_element_by_css_selector(NShopping.includeShipChkBoxSelector).click()
-        NShopping.title = NShopping.get_title()
-        NShopping.time = time.gmtime(int(time.time()))
-
+        NShopping.title = NShopping.browser.find_element_by_css_selector('head > title').text
+        NShopping.time = int(time.time())
+        # 가격
         NShopping.rawPrice = NShopping.browser.find_element_by_css_selector(NShopping.priceSelector).text
         NShopping.price = int_sieve(NShopping.rawPrice)
-
+        # 배송료
         NShopping.rawShipPrice = NShopping.browser.find_element_by_css_selector(NShopping.shipPriceSelector).text
         NShopping.shipPrice = int_sieve(NShopping.rawShipPrice)
 
         NShopping.finalPrice = int(NShopping.price) + int(NShopping.shipPrice)
-        NShopping.finalPrice = str(NShopping.finalPrice)
-        print(time.strftime('[%x,%X] ', NShopping.time) + NShopping.get_title() + '의 내용: '
-              + '₩ ' + NShopping.finalPrice)
-        f.write(time.strftime('[%x,%X] ', NShopping.time) + NShopping.get_title() + '의 내용: '
-                + '₩ ' + NShopping.finalPrice + '\n')
+        print(time.strftime('[%y/%m/%d,%X] ', time.localtime(NShopping.time)) + NShopping.title + '의 내용: '
+              + '₩ ' + str(NShopping.finalPrice))
+        f.write(time.strftime('[%y/%m/%d,%X] ', time.localtime(NShopping.time)) + NShopping.title + '의 내용: '
+                + '₩ ' + str(NShopping.finalPrice) + '\n')
 
         f.close()
         NShopping.browser.close()
+
+        with open('stock.json', encoding='utf-8') as jsonFile:
+            jsonData = json.load(jsonFile)
+            jsonData['NaverShopping'][1]['data'].append({NShopping.time: NShopping.finalPrice})
+        with open('stock.json', 'w', encoding='utf-8') as jsonFile:
+            jsonFile.write(json.dumps(jsonData))
         time.sleep(60)

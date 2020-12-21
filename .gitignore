@@ -10,3 +10,5 @@ todo
 config.ini
 
 Server/.venv/
+
+Server/stock.json
