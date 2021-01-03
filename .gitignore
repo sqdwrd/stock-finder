@@ -4,7 +4,7 @@ nohup.out
 *.bak
 html/*
 todo
-.venv/*
+.venv
 .idea/*
 *geckodriver*
 config.ini
@@ -12,3 +12,9 @@ config.ini
 Server/.venv/
 
 Server/stock.json
+
+Client/stock.json
+
+Client/__pycache__/
+
+Server/__pycache__/
